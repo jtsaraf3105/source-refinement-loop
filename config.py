@@ -21,7 +21,7 @@ class Settings:
         self.top_n: int = int(os.getenv("TOP_N_CANDIDATES", "5"))
         # Generous default: a broad search can ask the model to score many
         # candidates, which takes well over the old 40s and tripped timeouts.
-        self.openai_timeout: float = float(os.getenv("OPENAI_TIMEOUT", "300"))
+        self.openai_timeout: float = float(os.getenv("OPENAI_TIMEOUT", "120"))
 
 
 @lru_cache
