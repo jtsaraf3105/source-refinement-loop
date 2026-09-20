@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 from typing import List
 
+from config import get_settings
 from models.schemas import RankedCandidate, RefinementResponse, SearchCriteria
 from services.llm import load_prompt, structured_call
 
@@ -40,4 +41,5 @@ def refine(
         load_prompt("refine_search.txt"),
         json.dumps(payload, ensure_ascii=False),
         RefinementResponse,
+        model=get_settings().refine_model,
     )

@@ -23,3 +23,8 @@ Grounding rules (critical):
 - Do not write generic praise like "strong technical candidate". Reference concrete
   facts: "6 yrs, Senior Backend Engineer at NimbusPay (startup), uses AWS RDS + PostgreSQL".
 - Rank strictly by fit to the rubric provided, not by your own preferences.
+
+Output discipline (important):
+- Return EXACTLY ONE entry per candidate supplied — no more, no fewer.
+- Never repeat a candidate id, and never restate the same explanation or evidence.
+- Keep each explanation to 1–2 sentences and evidence to 2–4 short bullets. Stop when done.

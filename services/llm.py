@@ -14,6 +14,7 @@ from openai import (
     APIConnectionError,
     APITimeoutError,
     AuthenticationError,
+    LengthFinishReasonError,
     OpenAI,
     RateLimitError,
 )
@@ -48,19 +49,39 @@ def _client() -> OpenAI:
     return OpenAI(api_key=settings.openai_api_key, timeout=settings.openai_timeout, max_retries=1)
 
 
-def structured_call(system_prompt: str, user_content: str, schema: Type[T]) -> T:
-    """Make one structured-output call and return a validated Pydantic object."""
+def _parse(model, system_prompt, user_content, schema, temperature):
+    return _client().beta.chat.completions.parse(
+        model=model,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content},
+        ],
+        response_format=schema,
+        temperature=temperature,
+    )
+
+
+def structured_call(
+    system_prompt: str, user_content: str, schema: Type[T], model: str | None = None
+) -> T:
+    """Make one structured-output call and return a validated Pydantic object.
+
+    `model` overrides the default (used to route the refinement step to a stronger
+    model that doesn't degenerate on its nested schema).
+    """
     settings = get_settings()
+    model = model or settings.openai_model
     try:
-        completion = _client().beta.chat.completions.parse(
-            model=settings.openai_model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_content},
-            ],
-            response_format=schema,
-            temperature=0.2,  # low → more reproducible rankings
-        )
+        try:
+            completion = _parse(model, system_prompt, user_content, schema, 0.2)
+        except LengthFinishReasonError:
+            # The model ran to the output-token limit — a degenerate, repeating
+            # response. A higher temperature usually breaks the loop; retry once.
+            logger.warning("Output length limit hit; retrying once at higher temperature")
+            completion = _parse(model, system_prompt, user_content, schema, 0.6)
+    except LengthFinishReasonError:
+        logger.exception("Output length limit hit again after retry")
+        raise LLMError("The AI service produced an over-long response. Please retry.")
     except AuthenticationError:
         logger.exception("OpenAI authentication failed")
         raise LLMError("Invalid OpenAI API key.")

@@ -29,3 +29,8 @@ For each meaningful change, add a FilterChange with:
 Also write a one-sentence `summary` of what changed overall. If the feedback does
 not justify changing anything, return the criteria unchanged with an empty changes
 list and say so in the summary.
+
+Output discipline (important):
+- Return at most 8 changes, each a distinct criterion. Never repeat a change or a
+  field, and never restate the same rubric item. Keep the summary to one sentence.
+- Return each filter/rubric field once. Produce the object and stop — do not pad.
