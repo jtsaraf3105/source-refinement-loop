@@ -121,18 +121,3 @@ transitions, frozen searches, empty results, and malformed LLM output.
 
 The tests mock the LLM, so they do not require OpenAI API calls.
 
-## Assignment Scope
-
-Intentionally not included:
-
-- Authentication
-- Database/persistence
-- Multiple user roles
-- External integrations
-- Production infrastructure
-
-These are outside the scope of the assignment.
-
-For a larger production talent pool, the filtering layer could move to an
-indexed datastore, followed by a cheaper retrieval/ranking stage before
-calling the LLM.
