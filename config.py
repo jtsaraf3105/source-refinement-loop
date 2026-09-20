@@ -16,7 +16,7 @@ class Settings:
         self.openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
         self.openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
         self.top_n: int = int(os.getenv("TOP_N_CANDIDATES", "5"))
-        self.openai_timeout: float = float(os.getenv("OPENAI_TIMEOUT", "90"))
+        self.openai_timeout: float = float(os.getenv("OPENAI_TIMEOUT", "300"))
 
 
 @lru_cache
