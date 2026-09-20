@@ -121,3 +121,5 @@ transitions, frozen searches, empty results, and malformed LLM output.
 
 The tests mock the LLM, so they do not require OpenAI API calls.
 
+Streamlit: https://source-refinement-loop.streamlit.app/
+
