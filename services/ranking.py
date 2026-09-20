@@ -14,6 +14,12 @@ from models.schemas import RankedCandidate, RankingResponse, Rubric, SearchCrite
 from services.filtering import apply_filters
 from services.llm import load_prompt, structured_call
 
+# Cap how many candidates we send to the ranker. Scoring emits an explanation +
+# evidence per candidate, so an unbounded set makes the call slow enough to time
+# out. We only ever surface top_n, so a bounded pool is plenty. At larger scale a
+# cheap pre-ranker would choose this pool instead of taking filter order.
+MAX_RANKED = 25
+
 
 def parse_query(query: str) -> SearchCriteria:
     """Natural language -> objective filters + subjective rubric."""
@@ -63,10 +69,12 @@ def build_shortlist(
     if not matched:
         return [], 0
 
-    scores = {s.id: s for s in score_candidates(criteria.rubric, matched).rankings}
+    # Only send a bounded pool to the LLM; total_matched still reflects the full count.
+    pool = matched[:MAX_RANKED]
+    scores = {s.id: s for s in score_candidates(criteria.rubric, pool).rankings}
 
     cards: List[RankedCandidate] = []
-    for profile in matched:
+    for profile in pool:
         s = scores.get(profile["id"])
         if s is None:
             continue  # model omitted this candidate; skip rather than fabricate
